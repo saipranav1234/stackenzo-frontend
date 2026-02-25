@@ -6,7 +6,7 @@ export default function Dashboard() {
 
   const logout = async () => {
     await axios.get("/api/logout", { withCredentials: true });
-    navigate("/login");
+    navigate("/");
   };
 
   return (
