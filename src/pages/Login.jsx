@@ -1,19 +1,32 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
-
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [showModal, setShowModal] = useState(false);
+  const location = useLocation();
   
+  // Initialize email from redirect state if available
+  const [form, setForm] = useState({ 
+    email: location.state?.email || "", 
+    password: "" 
+  });
+  
+  const [showModal, setShowModal] = useState(false);
+  const [toast, setToast] = useState({ message: "", type: null });
+
   // States for button and timer
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  // Timer logic for the Resend button
+  // Helper to show toasts
+  const triggerToast = (msg, type) => {
+    setToast({ message: msg, type });
+    setTimeout(() => setToast({ message: "", type: null }), 4000);
+  };
+
+  // Timer logic
   useEffect(() => {
     let interval = null;
     if (resendTimer > 0) {
@@ -31,13 +44,17 @@ export default function Login() {
     setIsLoggingIn(true);
     try {
       const res = await axios.post("/api/login", form, { withCredentials: true });
-      alert(res.data.message);
-      navigate("/dashboard");
+      triggerToast(res.data.message || "Login Successful!", "success");
+      
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
     } catch (err) {
-      if (err.response?.data?.error === "Account not verified") {
+      const errorMsg = err.response?.data?.error || "Error";
+      if (errorMsg === "Account not verified") {
         setShowModal(true);
       } else {
-        alert(err.response?.data?.error || "Error");
+        triggerToast(errorMsg, "error");
       }
     } finally {
       setIsLoggingIn(false);
@@ -46,26 +63,34 @@ export default function Login() {
 
   const resend = async () => {
     if (resendTimer > 0) return; 
-
     setIsResending(true);
     try {
       const res = await axios.post("/api/resend-verification", { 
         email: form.email, 
         method: "link" 
       });
-      alert(res.data.message || "A fresh verification link has been sent!");
+      triggerToast(res.data.message || "Link sent!", "success");
       setResendTimer(60); 
     } catch (err) {
-      alert(err.response?.data?.error || "Resend failed");
+      triggerToast(err.response?.data?.error || "Resend failed", "error");
     } finally {
       setIsResending(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 font-sans text-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 font-sans text-gray-900 relative overflow-hidden">
+      
+      {/* --- TOAST NOTIFICATION --- */}
+      {toast.type && (
+        <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-500 animate-in slide-in-from-top-full
+          ${toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
+          <span className="font-bold">{toast.type === "success" ? "✓" : "✕"}</span>
+          <p className="text-sm font-semibold">{toast.message}</p>
+        </div>
+      )}
+
       {/* --- Main Login Form --- */}
-      {/* FIXED: changed max-md to max-w-md below */}
       <form
         onSubmit={submit}
         className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-200"
@@ -77,8 +102,6 @@ export default function Login() {
             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="Email Address"
             type="email"
-            name="email"
-            autoComplete="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             required
@@ -87,8 +110,6 @@ export default function Login() {
           <input
             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             type="password"
-            name="password"
-            autoComplete="current-password"
             placeholder="Password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -116,7 +137,7 @@ export default function Login() {
 
       {/* --- Verification Pending Modal --- */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-amber-100 mb-4">
@@ -127,13 +148,13 @@ export default function Login() {
               
               <h3 className="text-xl font-bold text-gray-900 mb-2">Verification Required</h3>
               <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-                Account found but needs verification. Check <b>{form.email}</b> or click below to resend.
+                Check <b>{form.email}</b> or click below to resend.
               </p>
               
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={() => navigate("/verify-otp", { state: { email: form.email } })}
-                  className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition"
+                  className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700"
                 >
                   Verify via OTP
                 </button>
@@ -143,11 +164,10 @@ export default function Login() {
                   disabled={isResending || resendTimer > 0}
                   className={`w-full py-2.5 rounded-lg font-semibold transition border flex justify-center items-center gap-2
                     ${(isResending || resendTimer > 0) 
-                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                      ? 'bg-gray-100 text-gray-400 border-gray-200' 
                       : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200'}`}
                 >
-                  {isResending && <span className="animate-spin border-2 border-blue-700 border-t-transparent rounded-full w-4 h-4"></span>}
-                  {isResending ? "Sending..." : resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend Verification Link"}
+                  {isResending ? "Sending..." : resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend Link"}
                 </button>
 
                 <button 
