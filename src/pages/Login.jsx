@@ -135,7 +135,7 @@ export default function Login() {
                   onClick={() => navigate("/verify-otp", { state: { email: form.email } })}
                   className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition"
                 >
-                  Enter OTP Page
+                  Verify via OTP
                 </button>
                 
                 <button 
