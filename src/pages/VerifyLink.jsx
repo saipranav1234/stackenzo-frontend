@@ -72,12 +72,12 @@ export default function VerifyLink() {
             <p className="text-gray-600">{message}</p>
             <div className="pt-4 flex flex-col gap-3">
               <Link 
-                to="/login"
+                to="/"
                 className="w-full bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-black transition"
               >
                 Back to Login
               </Link>
-              <Link to="/" className="text-blue-600 text-sm hover:underline">
+              <Link to="/register" className="text-blue-600 text-sm hover:underline">
                 Try Registering Again
               </Link>
             </div>
