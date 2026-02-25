@@ -15,7 +15,7 @@ export default defineConfig({
     // 2. Proxying /api calls to your Express server
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
+        target: "http://13.232.170.48:8000",
         changeOrigin: true,
         secure: false,
       },
