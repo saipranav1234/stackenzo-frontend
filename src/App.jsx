@@ -10,8 +10,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/Register" element={<Register />} />
         <Route path="/:token" element={<VerifyLink />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
 

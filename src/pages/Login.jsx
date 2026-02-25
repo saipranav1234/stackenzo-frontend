@@ -108,7 +108,7 @@ export default function Login() {
 
         <p className="mt-4 text-center text-gray-600">
           New user?{" "}
-          <Link to="/" className="text-blue-600 font-semibold hover:underline">
+          <Link to="/register" className="text-blue-600 font-semibold hover:underline">
             Create account
           </Link>
         </p>

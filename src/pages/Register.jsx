@@ -23,7 +23,7 @@ export default function Register() {
       if (selectedMethod === "otp") {
         navigate("/verify-otp", { state: { email: registeredEmail } });
       } else {
-        navigate("/login", { state: { email: registeredEmail } });
+        navigate("/", { state: { email: registeredEmail } });
       }
       
     }  catch (err) {
@@ -34,7 +34,7 @@ export default function Register() {
 
   if (lowError.includes("account_unverified") || lowError.includes("already registered")) {
     alert("This email is already registered. Please login to continue.");
-    navigate("/login", { state: { email: form.email } });
+    navigate("/", { state: { email: form.email } });
   } else {
     alert(errorResponse || "Error during registration");
   }
@@ -93,7 +93,7 @@ export default function Register() {
         </button>
         
         <p className="mt-4 text-center text-gray-600">
-          Already have an account? <Link to="/login" className="text-blue-600 hover:underline font-medium">Login</Link>
+          Already have an account? <Link to="/" className="text-blue-600 hover:underline font-medium">Login</Link>
         </p>
       </form>
     </div>
