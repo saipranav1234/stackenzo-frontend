@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { API_URL } from "../config";
+
 
 export default function Register() {
   const navigate = useNavigate();
@@ -13,9 +13,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await axios.post(`${API_URL}/api/register`, form, {
-  withCredentials: true,
-});
+      const res = await axios.post("/api/register", form, { withCredentials: true });
       
       // Capture the email and method before we clear the form
       const registeredEmail = form.email;
