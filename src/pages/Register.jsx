@@ -7,12 +7,10 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", method: "link" });
   
-  // Modal & Resend States
   const [showModal, setShowModal] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [isResending, setIsResending] = useState(false);
 
-  // Timer logic for Resend button
   useEffect(() => {
     let interval = null;
     if (resendTimer > 0) {
@@ -45,11 +43,14 @@ export default function Register() {
       }
       
     } catch (err) {
-      // Logic: If email exists but is not verified, show the modal
-      if (err.response?.data?.error === "Email already registered" || err.response?.data?.error === "Account not verified") {
+      const errorResponse = err.response?.data?.error;
+
+      // SPECIFIC LOGIC: Only show modal if the backend says the account is specifically unverified
+      if (errorResponse === "account_unverified") {
         setShowModal(true);
       } else {
-        alert(err.response?.data?.error || "Error during registration");
+        // For "Email already registered" (meaning it's verified) or other errors, show alert
+        alert(errorResponse || "Error during registration");
       }
     } finally {
       setLoading(false);
@@ -64,7 +65,7 @@ export default function Register() {
         email: form.email, 
         method: form.method 
       });
-      alert("A fresh verification link/OTP has been sent!");
+      alert("Verification resent!");
       setResendTimer(60);
     } catch (err) {
       alert(err.response?.data?.error || "Resend failed");
@@ -74,7 +75,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 font-sans text-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 font-sans">
       <form onSubmit={submit} className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-200">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
         
@@ -100,12 +101,12 @@ export default function Register() {
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-600">Verification Method</label>
             <div className="flex gap-4">
-              <label className={`flex-1 flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${form.method === 'link' ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500' : 'bg-gray-50 border-gray-200'}`}>
+              <label className={`flex-1 flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${form.method === 'link' ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
                 <input type="radio" name="method" value="link" checked={form.method === "link"} onChange={(e) => setForm({ ...form, method: e.target.value })} className="hidden" />
                 <span className="text-sm font-medium">Email Link</span>
               </label>
 
-              <label className={`flex-1 flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${form.method === 'otp' ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500' : 'bg-gray-50 border-gray-200'}`}>
+              <label className={`flex-1 flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer transition-all ${form.method === 'otp' ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
                 <input type="radio" name="method" value="otp" checked={form.method === "otp"} onChange={(e) => setForm({ ...form, method: e.target.value })} className="hidden" />
                 <span className="text-sm font-medium">OTP Code</span>
               </label>
@@ -119,7 +120,7 @@ export default function Register() {
             ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
         >
           {loading && <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>}
-          {loading ? "Creating..." : "Register"}
+          {loading ? "Registering..." : "Register"}
         </button>
         
         <p className="mt-4 text-center text-gray-600">
@@ -137,24 +138,27 @@ export default function Register() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Account Unverified</h3>
-              <p className="text-sm text-gray-500 mb-6">
-                This email is already registered but needs verification.
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Finish Verification</h3>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                You've already started signing up with <b>{form.email}</b>. Please complete verification to continue.
               </p>
               
               <div className="flex flex-col gap-3">
-                <button onClick={() => navigate("/verify-otp", { state: { email: form.email } })} className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition">
-                  Go to Verify Page
+                <button 
+                  onClick={() => navigate("/verify-otp", { state: { email: form.email } })} 
+                  className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition"
+                >
+                  Go to OTP Page
                 </button>
                 <button 
                   disabled={isResending || resendTimer > 0} 
                   onClick={resend} 
                   className={`w-full py-2.5 rounded-lg font-semibold border flex justify-center items-center gap-2
-                    ${(isResending || resendTimer > 0) ? 'bg-gray-50 text-gray-400 border-gray-200' : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'}`}
+                    ${(isResending || resendTimer > 0) ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'}`}
                 >
-                  {isResending ? "Sending..." : resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend Link/OTP"}
+                  {isResending ? "Sending..." : resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend Verification"}
                 </button>
-                <button onClick={() => setShowModal(false)} className="w-full bg-gray-50 text-gray-500 py-2.5 rounded-lg font-semibold hover:bg-gray-100 mt-2">
+                <button onClick={() => setShowModal(false)} className="w-full bg-gray-50 text-gray-500 py-2.5 rounded-lg font-semibold hover:bg-gray-100">
                   Close
                 </button>
               </div>
