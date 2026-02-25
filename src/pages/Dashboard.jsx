@@ -21,9 +21,9 @@ export default function Dashboard() {
       <main className="p-8 max-w-4xl mx-auto">
         <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Welcome to your Dashboard</h1>
-          <p className="text-lg text-gray-600">You are successfully authenticated using our Magic Link/OTP system.</p>
+          <p className="text-lg text-gray-600">You are successfully authenticated</p>
           <div className="mt-8 p-4 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 font-medium">
-            ✨ Pro Tip: You can now access all protected routes.
+            Enjoy the dashboard
           </div>
         </div>
       </main>
