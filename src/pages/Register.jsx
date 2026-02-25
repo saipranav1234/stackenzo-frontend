@@ -26,19 +26,21 @@ export default function Register() {
         navigate("/login", { state: { email: registeredEmail } });
       }
       
-    } catch (err) {
-      const errorResponse = err.response?.data?.error;
+    }  catch (err) {
+  const errorResponse = err.response?.data?.error || "";
 
-      // If user exists (verified or unverified), send them to Login
-      if (errorResponse === "account_unverified" || errorResponse === "Email already registered") {
-        alert("This email is already registered. Please login to continue.");
-        navigate("/login", { state: { email: form.email } });
-      } else {
-        alert(errorResponse || "Error during registration");
-      }
-    } finally {
-      setLoading(false);
-    }
+  // Convert to lowercase to avoid Case-Sensitivity issues
+  const lowError = errorResponse.toLowerCase();
+
+  if (lowError.includes("account_unverified") || lowError.includes("already registered")) {
+    alert("This email is already registered. Please login to continue.");
+    navigate("/login", { state: { email: form.email } });
+  } else {
+    alert(errorResponse || "Error during registration");
+  }
+} finally {
+  setLoading(false);
+}
   };
 
   return (
