@@ -100,7 +100,7 @@ export default function Login() {
           type="submit"
           disabled={isLoggingIn}
           className={`w-full mt-6 font-bold py-3 rounded-lg transition-all duration-200 shadow-md text-white flex justify-center items-center gap-2
-            ${isLoggingIn ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+            ${isLoggingIn ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
         >
           {isLoggingIn && <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>}
           {isLoggingIn ? "Authenticating..." : "Login"}
