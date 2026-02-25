@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { API_URL } from "../config";
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function Login() {
     e.preventDefault();
     setIsLoggingIn(true);
     try {
-      const res = await axios.post(`${API_URL}/api/register`, form, { withCredentials: true });
+      const res = await axios.post("/api/login", form, { withCredentials: true });
       alert(res.data.message);
       navigate("/dashboard");
     } catch (err) {
